@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addMotorAPI, deleteMotorApi, fetchMotors, updateMotorApi } from '../redux/actions/motorActions';
 import Banner from '../components/banner';
 import * as ImagePicker from 'react-native-image-picker';
+import { sortListMotor } from '../redux/reducers/motorReducers';
 
 const HomeScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -14,12 +15,15 @@ const HomeScreen = () => {
     const [color, setColor] = useState('')
     const [image, setImage] = useState(null)
     const [isUpdate, setUpdate] = useState(false)
+    const [search, setSearch] = useState([])
     const [id, setId] = useState('')
 
     const dispatch = useDispatch();
+
     useEffect(() => {
         dispatch(fetchMotors());
     }, [dispatch]);
+
     const list = useMemo(() => {
         return listMotor
     })
@@ -36,10 +40,6 @@ const HomeScreen = () => {
             }
         });
     }, []);
-    useEffect(() => {
-        console.log(image)
-    }, [image])
-
 
     const handleDeleteMotor = async (id) => {
         dispatch(deleteMotorApi(id))
@@ -49,6 +49,9 @@ const HomeScreen = () => {
             .catch((error) => {
                 ToastAndroid.show("Xóa xe máy thành công", ToastAndroid.SHORT);
             });
+    }
+    const sortList = (number) => {
+        dispatch(sortListMotor({numberSort : number}))
     }
 
     const handleAddData = () => {
@@ -81,16 +84,28 @@ const HomeScreen = () => {
             console.log(error)
         })
     }
-
-
+    const filteredMotor = search ? list.filter(motor => motor.name_ph32353.includes(search)) : list;
     return (
         <SafeAreaView style={{ width: '100%', backgroundColor: '#30336b', height: '100%', padding: 10 }}>
             <Banner uri={"https://phunugioi.com/wp-content/uploads/2021/07/Hinh-anh-xe-Dream-dep-nhat.jpg"} />
-            <Text style={{ color: 'white', fontSize: 25, fontWeight: 'bold' }}>
-                Danh sách xe
-            </Text>
+            <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10, paddingBottom: 10, justifyContent: 'space-between' }}>
+                <Text style={{ color: 'white', fontSize: 25, fontWeight: 'bold' }}>
+                    Danh sách xe
+                </Text>
+                <View style={{ flexDirection: 'row', width: '30%', justifyContent: 'space-between' }}>
+                    <Button onPress={() => sortList(1)} title='Tăng' />
+                    <Button onPress={() => sortList(2)} title='Giảm' />
+                </View>
+            </View>
+            <TextInput
+                onChangeText={(text) => {
+                    setSearch(text)
+                }}
+                placeholder='Search'
+                style={{ width: '100%', padding: 10, marginBottom: 10, backgroundColor: 'white', height: 45, borderWidth: 1, borderRadius: 15 }}>
+            </TextInput>
             <FlatList
-                data={list}
+                data={filteredMotor}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => {
                     return <View style={{ width: '100%', padding: 5, backgroundColor: 'white', flexDirection: 'row', height: 130, borderWidth: 1, borderColor: 'white', borderRadius: 15, marginBottom: 10 }}>

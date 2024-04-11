@@ -10,6 +10,15 @@ const motorSlice = createSlice({
         addMotor(state, action) {
             state.listMotor.push(action.payload);
         },
+        sortListMotor(state, action) {
+            const { numberSort } = action.payload
+            console.log(numberSort)
+            if (numberSort == 1) {
+                state.listMotor = state.listMotor.sort((a, b) => a.price_ph32353 - b.price_ph32353)
+            } else {
+                state.listMotor = state.listMotor.sort((a, b) => b.price_ph32353 - a.price_ph32353)
+            }
+        }
     },
     extraReducers: builder => {
         builder.addCase(addMotorAPI.fulfilled, (state, action) => {
@@ -19,8 +28,6 @@ const motorSlice = createSlice({
                 // Xử lý khi yêu cầu thêm todo bị từ chối hoặc xảy ra lỗi
                 console.log('Add todo rejected:', action.error.message);
             });
-
-
         //DELETE
 
         builder.addCase(deleteMotorApi.fulfilled, (state, action) => {
@@ -54,5 +61,5 @@ const motorSlice = createSlice({
 
     },
 })
-export const { addMotor } = motorSlice.actions;
+export const { addMotor, sortListMotor} = motorSlice.actions;
 export default motorSlice.reducer;
