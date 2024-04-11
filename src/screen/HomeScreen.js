@@ -5,20 +5,49 @@ import { addMotorAPI, deleteMotorApi, fetchMotors, updateMotorApi } from '../red
 import Banner from '../components/banner';
 import * as ImagePicker from 'react-native-image-picker';
 import { sortListMotor } from '../redux/reducers/motorReducers';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming,
+    withRepeat,
+    withSpring,
+} from 'react-native-reanimated';
+
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 const HomeScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const listMotor = useSelector(state => state.listMotor.listMotor);
     const [name, setName] = useState('')
     const [price, setPrice] = useState('')
+    
     const [describe, setDescribe] = useState('')
     const [color, setColor] = useState('')
     const [image, setImage] = useState(null)
+    const initialOffset = 10;
     const [isUpdate, setUpdate] = useState(false)
     const [search, setSearch] = useState([])
     const [id, setId] = useState('')
+    const opacity = useSharedValue(0);
+
+    const offset = useSharedValue(initialOffset);
+
+    const animatedStyles = useAnimatedStyle(() => ({
+        transform: [{ translateY: offset.value }],
+    }));
 
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        opacity.value = withTiming(1, { duration: 5000 });
+        offset.value = withRepeat(withSpring(-offset.value),-1,true);
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            opacity: opacity.value,
+        };
+    });
 
     useEffect(() => {
         dispatch(fetchMotors());
@@ -51,7 +80,7 @@ const HomeScreen = () => {
             });
     }
     const sortList = (number) => {
-        dispatch(sortListMotor({numberSort : number}))
+        dispatch(sortListMotor({ numberSort: number }))
     }
 
     const handleAddData = () => {
@@ -88,10 +117,14 @@ const HomeScreen = () => {
     return (
         <SafeAreaView style={{ width: '100%', backgroundColor: '#30336b', height: '100%', padding: 10 }}>
             <Banner uri={"https://phunugioi.com/wp-content/uploads/2021/07/Hinh-anh-xe-Dream-dep-nhat.jpg"} />
-            <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10, paddingBottom: 10, justifyContent: 'space-between' }}>
-                <Text style={{ color: 'white', fontSize: 25, fontWeight: 'bold' }}>
-                    Danh sách xe
-                </Text>
+            <View style={{ width: '100%', height: 'auto', flexDirection: 'row', paddingTop: 10, paddingBottom: 10, justifyContent: 'space-between' }}>
+                <Animated.Text
+                    style={[
+                        { fontWeight: 'bold', fontSize: 25, color: 'white', marginBottom: 10 },
+                        animatedStyle,
+                    ]}>
+                    Danh sách xe máy
+                </Animated.Text>
                 <View style={{ flexDirection: 'row', width: '30%', justifyContent: 'space-between' }}>
                     <Button onPress={() => sortList(1)} title='Tăng' />
                     <Button onPress={() => sortList(2)} title='Giảm' />
@@ -170,22 +203,36 @@ const HomeScreen = () => {
                     </View>
                 }}
             />
-            <TouchableOpacity
-                onPress={
-                    () => {
-                        setModalVisible(true)
-                        setColor('')
-                        setImage(null)
-                        setDescribe('')
-                        setPrice('')
-                        setId('')
-                        setName('')
-                        setUpdate(false)
+            <AnimatedTouchableOpacity
+                    onPress={
+                        () => {
+                            setUpdate(false)
+                            setId("")
+                            setColor("")
+                            setImage(null)
+                            setDescribe("")
+                            setName("")
+                            setPrice("")
+                            setModalVisible(true)
+                        }
                     }
-                }
-                style={{ width: 60, height: 60, borderRadius: 30, position: 'absolute', end: 40, bottom: 40, backgroundColor: '#f0932b', justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>+</Text>
-            </TouchableOpacity>
+                    style={[
+                        {
+                            position: 'absolute',
+                            end: 40,
+                            bottom: 40,
+                            width: 60,
+                            height: 60,
+                            borderRadius: 30,
+                            backgroundColor: 'orange',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        },
+                        animatedStyles
+                    ]}
+                >
+                    <Text style={{ color: 'white', fontSize: 30, fontWeight: 'bold' }}>+</Text>
+                </AnimatedTouchableOpacity>
 
             <Modal
                 animationType="slide"
